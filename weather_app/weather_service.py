@@ -50,8 +50,8 @@ class WeatherService:
         reqParams = {
             "latitude": latitude,
             "longitude": longitude,
-            "current": ["temperature_2m", "relative_humidity_2m", "wind_speed_10m"],
-	        "hourly": ["temperature_2m", "relative_humidity_2m", "wind_speed_10m"],
+            "current": ["temperature_2m", "relative_humidity_2m", "wind_speed_10m", "rain", "showers", "snowfall"],
+	        "hourly": ["temperature_2m", "relative_humidity_2m", "wind_speed_10m", "rain", "showers", "snowfall"],
             "timezone": "auto",
         }
 
@@ -67,6 +67,8 @@ class WeatherService:
             'humidity': res_data.get('hourly', {}).get('relative_humidity_2m', []),
             'weather_code': res_data.get('hourly', {}).get('weather_code', []),
             'wind_speed': res_data.get('hourly', {}).get('wind_speed_10m', []),
+            "snowfall": res_data.get('hourly', {}).get('snowfall', []),
+            "rain": res_data.get('hourly', {}).get('rain', []),
         }
 
         # Extract current weather data
@@ -84,6 +86,8 @@ class WeatherService:
                     'temperature': hourly_data['temperature'][i],
                     'humidity': hourly_data['humidity'][i],
                     'wind_speed': hourly_data['wind_speed'][i],
+                    "snowfall": hourly_data["snowfall"][i],
+                    "rain": hourly_data["rain"][i]
                 })
 
         ## Store result in cache
