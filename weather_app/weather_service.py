@@ -2,7 +2,7 @@
 import datetime
 import requests
 from typing import Dict
-
+from django.core.cache import cache
 
 class WeatherService:
     BASE_URL: str = "https://api.open-meteo.com/v1/forecast"
@@ -10,20 +10,25 @@ class WeatherService:
 
     @staticmethod
     def fetch_cords(city: str) -> Dict[str, any]:
+        ## Check if cords exist in cache
+        key: str = city.replace(" ", "_")
+        if cache.has_key(key):
+            return cache.get(key)
+        ## If no cache was found, make a request
         req_params = {
             "name": city,
             "count": 1
         }
-
         response = requests.get(WeatherService.GEOCODE_URL, params=req_params)
         response.raise_for_status()
         data = response.json()
         if data["results"]:
+            ## Cache result
+            cache.set(key, data["results"][0])
             return data["results"][0]
         else:
             raise ValueError(f"City not found: '{city}'")
         
-
     @staticmethod
     def fetch_weather(city=None, latitude=None, longitude=None):
         ## If the city was specified, try looking up the city's cords 
@@ -35,6 +40,12 @@ class WeatherService:
         if (latitude is None) or (longitude is None):
             raise ValueError("Either coordinates or city name must be provided")
 
+        ## Check if weather exists in cache
+        key: str = f"{latitude}_{longitude}"
+        if cache.has_key(key):
+            return cache.get(key)
+        
+        ## Weather not found in cache, make a request
         reqParams = {
             "latitude": latitude,
             "longitude": longitude,
@@ -74,4 +85,7 @@ class WeatherService:
                     'wind_speed': hourly_data['wind_speed'][i],
                 })
 
+        ## Store result in cache
+        cache.set(key, filtered_data)
         return filtered_data
+    

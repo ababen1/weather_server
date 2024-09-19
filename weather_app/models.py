@@ -1,3 +1,4 @@
+import datetime
 from django.db import models
 
 class WeatherRequest(models.Model):
