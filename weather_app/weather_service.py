@@ -1,6 +1,7 @@
 
 import datetime
 import requests
+from requests import Response
 from typing import Dict
 from django.core.cache import cache
 
@@ -15,22 +16,22 @@ class WeatherService:
         if cache.has_key(key):
             return cache.get(key)
         ## If no cache was found, make a request
-        req_params = {
-            "name": city,
+        req_params: dict = {
+            "name": city.title(),
             "count": 1
         }
-        response = requests.get(WeatherService.GEOCODE_URL, params=req_params)
+        response: Response = requests.get(WeatherService.GEOCODE_URL, params=req_params)
         response.raise_for_status()
-        data = response.json()
-        if data["results"]:
+        data: dict = response.json()
+        if data.get("results", None):
             ## Cache result
             cache.set(key, data["results"][0])
             return data["results"][0]
         else:
-            raise ValueError(f"City not found: '{city}'")
+            raise ValueError(f"City not found: '{city.title()}'")
         
     @staticmethod
-    def fetch_weather(city=None, latitude=None, longitude=None):
+    def request_weather(city=None, latitude=None, longitude=None):
         ## If the city was specified, try looking up the city's cords 
         if city:
             cords = WeatherService.fetch_cords(city)
