@@ -3,7 +3,7 @@ from django.db import models
 
 class WeatherRequest(models.Model):
     city = models.CharField(max_length=100, blank=True, null=True)
-    lantitude = models.FloatField(blank=True, null=True)
+    latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
 
 class WeatherData(models.Model):

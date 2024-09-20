@@ -7,7 +7,13 @@ from .weather_service import WeatherService
 
 @api_view(['POST'])
 def post_weather(request: Request) -> Response:
-    serializer = WeatherRequestSerializer(data=request.data)
+    data = {
+        "city": request.data.get("city"),
+        "latitude": request.data.get("coordinates", {}).get("latitude"),
+        "longitude": request.data.get("coordinates", {}).get("longitude")
+
+    }
+    serializer = WeatherRequestSerializer(data=data)
     return make_request(serializer)
 
 @api_view(['GET'])
@@ -23,12 +29,12 @@ def get_weather_cords(request: Request, lantitude: float = None, longitude: floa
 def make_request(serializer: WeatherRequestSerializer) -> Response:
     if serializer.is_valid():
         city: str = serializer.validated_data.get("city")
-        lantitude: float = serializer.validated_data.get("lantitude")
+        latitude: float = serializer.validated_data.get("latitude")
         longitude: float = serializer.validated_data.get("longitude")
 
         # Fetch weather using service function
         try:
-            weather_info = WeatherService.request_weather(city, lantitude, longitude)
+            weather_info = WeatherService.request_weather(city, latitude, longitude)
             return Response(weather_info, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
